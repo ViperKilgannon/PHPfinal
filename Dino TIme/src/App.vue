@@ -2,7 +2,9 @@
   <v-app>
     <v-content>
       <!-- new stuff here -->
-      <Home />
+      <Home v-if="!$root.CurrentUser" />
+      <Admin v-if="$root.CurrentUser && $root.isAdmin" />
+      <User v-if="$root.CurrentUser && !$root.isAdmin" />
     </v-content>
   </v-app>
 </template>
@@ -16,7 +18,9 @@ export default {
   name: "App",
 
   components: {
-    Home
+    Home,
+    Admin,
+    User
   },
 
   data: () => ({
