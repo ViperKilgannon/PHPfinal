@@ -29,6 +29,12 @@
         <template v-slot:item.equipment="{ item }">
           <v-simple-checkbox v-model="item.equipment"></v-simple-checkbox>
         </template>
+        <template v-slot:item.todayIn="{ item }">
+          <span>{{getTimeIn(item.todayIn)}}</span>
+        </template>
+        <template v-slot:item.todayOut="{ item }">
+          <span>{{getTimeIn(item.todayOut)}}</span>
+        </template>
       </v-data-table>
     </v-content>
   </v-app>
@@ -49,6 +55,7 @@ export default {
       },
       { text: "Pre-paid Hours", value: "Hours" },
       { text: "Time In", value: "todayIn" },
+      { text: "Time Out", value: "todayOut" },
       { text: "Ammount Owed", value: "owedAmount" },
       { text: "Day Pass?", value: "dayPass" },
       { text: "Has Equipment?", value: "equipment" }
@@ -57,7 +64,8 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: null,
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
@@ -65,7 +73,8 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: new Date(),
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
@@ -73,7 +82,8 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: new Date(),
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
@@ -81,7 +91,8 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: new Date(),
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
@@ -89,7 +100,8 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: new Date(),
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
@@ -97,7 +109,8 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: new Date(),
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
@@ -105,13 +118,39 @@ export default {
       {
         name: "Bill Clinton",
         Hours: 5,
-        todayIn: "10:56",
+        todayIn: new Date(),
+        todayOut: new Date(),
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
       }
     ]
-  })
+  }),
+
+  methods: {
+    getTimeIn(time) {
+      function addZero(i) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        return i;
+      }
+      function formatDateTime() {
+        let d = time;
+        let h = addZero(d.getHours());
+        let m = addZero(d.getMinutes());
+        let s = addZero(d.getSeconds());
+        time = h + ":" + m + ":" + s;
+      }
+
+      if (time) {
+        formatDateTime(time);
+      } else {
+        time = "00:00:00";
+      }
+      return time;
+    }
+  }
 };
 </script>
 

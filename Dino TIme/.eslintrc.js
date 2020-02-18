@@ -19,6 +19,11 @@ module.exports = {
     'indent': 'off',
     'semi': 'off',
     'max-len': 'off',
-    'eol-last': 'off'
+    'eol-last': 'off',
+    'no-undef': 'off',
+    'no-param-reassign': 'off',
+    'prefer-template': 'off',
+    'prefer-const': 'off',
+    'no-var': 'off'
   },
 };
