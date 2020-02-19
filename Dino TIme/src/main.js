@@ -8,7 +8,8 @@ new Vue({
   data: {
     CurrentUser: false,
     isAdmin: true,
-    CurrentUserName: "TEMP"
+    CurrentUserName: "TEMP",
+    currentSignedIn: []
   },
   vuetify,
   render: (h) => h(App),

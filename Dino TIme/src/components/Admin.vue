@@ -14,6 +14,7 @@
       />
 
       <v-spacer />
+      <v-btn @click="registerBox = true">Register User</v-btn>
     </v-app-bar>
 
     <v-content class="grey darken-3 fill-height">
@@ -36,16 +37,94 @@
           <span>{{getTimeIn(item.todayOut)}}</span>
         </template>
       </v-data-table>
+    <!-- register box -->
+    <v-dialog v-model="registerBox" persistent max-width="600px">
+      <v-card>
+        <v-app-bar color="blue">
+          <v-card-title>
+            <span class="headline">Register</span>
+          </v-card-title>
+        </v-app-bar>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="username"
+                  prepend-icon="mdi-account-circle"
+                  label="Username"
+                  type="text"
+                  required
+                ></v-text-field>
+              </v-col>
+                <v-col cols="12">
+                <v-text-field
+                  v-model="name"
+                  prepend-icon="mdi-account-circle"
+                  label="Name"
+                  type="text"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="password"
+                  prepend-icon="mdi-lock"
+                  label="Password"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="confirmpassword"
+                  bounce
+                  prepend-icon="mdi-lock-alert"
+                  label="Confirm Password"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+              <v-col cols="12">
+                <v-switch
+                  v-model="admin"
+                  label="Admin?"
+                  prepend-icon="mdi-account-circle"
+                  color="success"
+                ></v-switch>
+              </v-col>
+          </v-container>
+        </v-card-text>
+        <v-card-subtitle class="error--text ml-5">{{ error }}</v-card-subtitle>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue" text @click="registerBox = false">Close</v-btn>
+          <v-btn color="blue" text @click="register(); registerBox = false">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     </v-content>
   </v-app>
 </template>
 
 <script>
+const server = "http://127.0.0.1/ajaxfile.php";
+const axios = require('axios').default;
+
 export default {
   props: {
     source: String
   },
   data: () => ({
+    registerBox: false,
+    username: "",
+    name: "",
+    password: "",
+    admin: false,
+    res: "",
+    confirmpassword: "",
+    error: "",
     headers: [
       {
         text: "Current Users Logged In",
@@ -78,56 +157,32 @@ export default {
         owedAmount: "$20.00",
         dayPass: false,
         equipment: true
-      },
-      {
-        name: "Bill Clinton",
-        Hours: 5,
-        todayIn: new Date(),
-        todayOut: new Date(),
-        owedAmount: "$20.00",
-        dayPass: false,
-        equipment: true
-      },
-      {
-        name: "Bill Clinton",
-        Hours: 5,
-        todayIn: new Date(),
-        todayOut: new Date(),
-        owedAmount: "$20.00",
-        dayPass: false,
-        equipment: true
-      },
-      {
-        name: "Bill Clinton",
-        Hours: 5,
-        todayIn: new Date(),
-        todayOut: new Date(),
-        owedAmount: "$20.00",
-        dayPass: false,
-        equipment: true
-      },
-      {
-        name: "Bill Clinton",
-        Hours: 5,
-        todayIn: new Date(),
-        todayOut: new Date(),
-        owedAmount: "$20.00",
-        dayPass: false,
-        equipment: true
-      },
-      {
-        name: "Bill Clinton",
-        Hours: 5,
-        todayIn: new Date(),
-        todayOut: new Date(),
-        owedAmount: "$20.00",
-        dayPass: false,
-        equipment: true
       }
     ]
   }),
 
   methods: {
+    register() {
+      if (this.password === this.confirmpassword) {
+        let dataToSend = {
+          action: "register",
+          username: this.username,
+          name: this.name,
+          password: this.password,
+          admin: this.admin
+        };
+        axios.post(server, dataToSend, (res) => {
+          this.res = JSON.stringify(res);
+          if (res.success) {
+            console.log(dataToSend + res);
+          } else {
+            this.error = "Username already exists";
+          }
+        });
+      } else {
+        this.error = "Password Does not Match";
+      }
+    },
     getTimeIn(time) {
       function addZero(i) {
         if (i < 10) {
