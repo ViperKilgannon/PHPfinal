@@ -11,10 +11,10 @@
         hide-details
         label="Search"
         prepend-inner-icon="mdi-magnify"
+        class="mr-5"
       />
-
-      <v-spacer />
-      <v-btn @click="registerBox = true">Register User</v-btn>
+      <v-btn @click="registerBox = true" class="mr-5">Register User</v-btn>
+      <v-btn @click="logout()">Logout</v-btn>
     </v-app-bar>
 
     <v-content class="grey darken-3 fill-height">
@@ -100,7 +100,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue" text @click="registerBox = false">Close</v-btn>
-          <v-btn color="blue" text @click="register(); registerBox = false">Confirm</v-btn>
+          <v-btn color="blue" text @click="register();">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -109,7 +109,7 @@
 </template>
 
 <script>
-const server = "http://127.0.0.1/ajaxfile.php";
+const server = "http://127.0.0.1/server/ajaxfile.php";
 const axios = require('axios').default;
 
 export default {
@@ -164,24 +164,40 @@ export default {
   methods: {
     register() {
       if (this.password === this.confirmpassword) {
-        let dataToSend = {
-          action: "register",
-          username: this.username,
-          name: this.name,
-          password: this.password,
-          admin: this.admin
-        };
-        axios.post(server, dataToSend, (res) => {
-          this.res = JSON.stringify(res);
-          if (res.success) {
-            console.log(dataToSend + res);
+        let bodyFormData = new FormData();
+        bodyFormData.set('action', "register");
+        bodyFormData.set('UserName', this.username);
+        bodyFormData.set('Name', this.name);
+        bodyFormData.set('password', this.password);
+        bodyFormData.set('Admin', this.admin);
+
+        axios.post(server, bodyFormData)
+        .then((res) => {
+          console.log(res);
+          if (res.data.success === true) {
+          this.registerBox = false
           } else {
-            this.error = "Username already exists";
+            this.error = res.data.message;
           }
-        });
-      } else {
-        this.error = "Password Does not Match";
+        })
+        .catch((res) => {
+          console.log(res);
+          this.error = "Server Error";
+        })
       }
+    },
+    logout() {
+        let bodyFormData = new FormData();
+        bodyFormData.set('action', "logout");
+    axios.post(server, bodyFormData)
+    .then((res) => {
+      console.log(res);
+        this.$root.CurrentUser = false;
+    })
+    .catch((res) => {
+          console.log(res);
+          alert("Server Error Still Logged In");
+        })
     },
     getTimeIn(time) {
       function addZero(i) {

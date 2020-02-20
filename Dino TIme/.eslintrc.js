@@ -24,6 +24,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'prefer-template': 'off',
     'prefer-const': 'off',
-    'no-var': 'off'
+    'no-var': 'off',
+    'spaced-comment': 'off'
   },
 };

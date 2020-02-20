@@ -6,47 +6,28 @@
           <v-col cols="12" sm="8" md="4">
             <v-card class="elevation-12">
               <v-toolbar color="primary" dark flat>
-                <v-toolbar-title>Login form</v-toolbar-title>
+                <v-toolbar-title>Login</v-toolbar-title>
                 <v-spacer />
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn :href="source" icon large target="_blank" v-on="on">
-                      <v-icon>mdi-code-tags</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Source</span>
-                </v-tooltip>
-                <v-tooltip right>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      large
-                      href="https://codepen.io/johnjleider/pen/pMvGQO"
-                      target="_blank"
-                      v-on="on"
-                    >
-                      <v-icon>mdi-codepen</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Codepen</span>
-                </v-tooltip>
               </v-toolbar>
               <v-card-text>
                 <v-form>
-                  <v-text-field label="Login" name="login" prepend-icon="mdi-account" type="text" />
+                  <v-text-field v-model="username" label="Username" name="login" prepend-icon="mdi-account" type="text" required />
 
                   <v-text-field
+                    v-model="password"
                     id="password"
                     label="Password"
                     name="password"
                     prepend-icon="mdi-lock"
                     type="password"
+                    required
                   />
                 </v-form>
               </v-card-text>
+              <v-card-subtitle class="error--text ml-5">{{ error }}</v-card-subtitle>
               <v-card-actions>
                 <v-spacer />
-                <v-btn color="primary" @click="$root.CurrentUser = true">Login</v-btn>
+                <v-btn color="primary" @click="login()">Login</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -57,9 +38,40 @@
 </template>
 
 <script>
+const server = "http://127.0.0.1/server/ajaxfile.php";
+const axios = require('axios').default;
+
 export default {
   props: {
     source: String
+  },
+   data: () => ({
+    error: "",
+    username: "",
+    password: ""
+   }),
+ methods: {
+   // todo add admin responce
+    login() {
+        let bodyFormData = new FormData();
+        bodyFormData.set('action', "login");
+        bodyFormData.set('UserName', this.username);
+        bodyFormData.set('password', this.password);
+
+        axios.post(server, bodyFormData)
+        .then((res) => {
+          console.log(res);
+          if (res.data.success === true) {
+          this.$root.CurrentUser = true
+          } else {
+            this.error = res.data.message;
+          }
+        })
+        .catch((res) => {
+          console.log(res);
+          this.error = "Server Error";
+        })
+      }
+    },
   }
-};
 </script>

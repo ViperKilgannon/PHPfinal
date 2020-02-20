@@ -7,7 +7,7 @@ Vue.config.productionTip = false;
 new Vue({
   data: {
     CurrentUser: false,
-    isAdmin: true,
+    isAdmin: false,
     CurrentUserName: "TEMP",
     currentSignedIn: []
   },
