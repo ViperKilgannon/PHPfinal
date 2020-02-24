@@ -9,7 +9,8 @@ new Vue({
     CurrentUser: false,
     isAdmin: false,
     CurrentUserName: "TEMP",
-    currentSignedIn: []
+    currentSignedIn: [],
+    CurrentUserSessionId: ""
   },
   vuetify,
   render: (h) => h(App),

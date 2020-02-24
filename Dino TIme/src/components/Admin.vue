@@ -37,6 +37,8 @@
           <span>{{getTimeIn(item.todayOut)}}</span>
         </template>
       </v-data-table>
+      <v-btn class="ml-12" @click="checkWhoSignIn()">Refresh</v-btn>
+        <v-btn class="mr-12 float-right" @click="endOfDay()">Close Day Sheet</v-btn>
     <!-- register box -->
     <v-dialog v-model="registerBox" persistent max-width="600px">
       <v-card>
@@ -162,6 +164,25 @@ export default {
   }),
 
   methods: {
+    checkWhoSignIn() {
+      let bodyFormData = new FormData();
+      bodyFormData.set('action', "checkSignIn");
+
+      axios.post(server, bodyFormData)
+      .then((res) => {
+        console.log(res);
+      })
+    },
+    endOfDay() {
+      let bodyFormData = new FormData();
+      bodyFormData.set('action', "clear");
+      bodyFormData.set('admin', this.$root.isAdmin);
+
+      axios.post(server, bodyFormData)
+      .then((res) => {
+        console.log(res);
+      })
+    },
     register() {
       if (this.password === this.confirmpassword) {
         let bodyFormData = new FormData();

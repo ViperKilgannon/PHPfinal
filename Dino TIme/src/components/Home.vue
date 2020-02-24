@@ -47,8 +47,9 @@ export default {
   },
    data: () => ({
     error: "",
-    username: "",
-    password: ""
+    username: "PlumpMemes",
+    password: "3258",
+    time: ""
    }),
  methods: {
    // todo add admin responce
@@ -57,12 +58,16 @@ export default {
         bodyFormData.set('action', "login");
         bodyFormData.set('UserName', this.username);
         bodyFormData.set('password', this.password);
+        bodyFormData.set('time', Date.now());
 
         axios.post(server, bodyFormData)
         .then((res) => {
           console.log(res);
           if (res.data.success === true) {
-          this.$root.CurrentUser = true
+          this.$root.CurrentUser = true;
+          this.$root.isAdmin = res.data.admin;
+          this.$root.CurrentUserName = res.data.user;
+          this.$root.CurrentUserSessionId = res.data.id;
           } else {
             this.error = res.data.message;
           }
@@ -71,7 +76,29 @@ export default {
           console.log(res);
           this.error = "Server Error";
         })
+      },
+      getTimeIn(time) {
+      function addZero(i) {
+        if (i < 10) {
+          i = "0" + i;
+        }
+        return i;
       }
+      function formatDateTime() {
+        let d = time;
+        let h = addZero(d.getHours());
+        let m = addZero(d.getMinutes());
+        let s = addZero(d.getSeconds());
+        time = h + ":" + m + ":" + s;
+      }
+
+      if (time) {
+        formatDateTime(time);
+      } else {
+        time = "00:00:00";
+      }
+      return time;
+    }
     },
   }
 </script>
