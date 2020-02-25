@@ -52,7 +52,6 @@ export default {
     time: ""
    }),
  methods: {
-   // todo add admin responce
     login() {
         let bodyFormData = new FormData();
         bodyFormData.set('action', "login");
