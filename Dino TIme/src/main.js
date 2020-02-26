@@ -8,7 +8,7 @@ new Vue({
   data: {
     CurrentUser: false,
     isAdmin: false,
-    CurrentUserName: "TEMP",
+    CurrentUserName: "",
     currentSignedIn: [],
     CurrentUserSessionId: ""
   },

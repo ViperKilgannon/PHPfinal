@@ -39,7 +39,11 @@
 
 <script>
 const server = "http://127.0.0.1/server/ajaxfile.php";
-const axios = require('axios').default;
+const Axios = require('axios');
+
+var axios = Axios.create({
+  withCredentials: true
+})
 
 export default {
   props: {

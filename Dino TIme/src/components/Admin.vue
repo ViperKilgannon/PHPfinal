@@ -21,23 +21,40 @@
       <v-data-table
         :headers="headers"
         :items="$root.currentSignedIn"
+        :single-expand=true
+        show-expand
+        disable-filtering
+        disable-sort
+        disable-pagination
         class="elevation-1 mx-12 grey lighten-1"
       >
         <template v-slot:item.timeIn="{ item }">
           <span>{{getTimeIn(item.timeIn)}}</span>
         </template>
         <template v-slot:item.timeOut="{ item }">
-          <span>{{getTimeIn(item.timeOut)}}</span>
+          <span>{{(getTimeIn(item.timeOut)=="00:00:00" ? "Currently Active" : getTimeIn(item.timeOut))}}</span>
         </template>
         <template v-slot:item.owedAmount="{ item }">
-          <span>{{getOwed(item.timeOut-item.timeIn, item.id)}}</span>
+          <span>{{(getTimeIn(item.timeOut)=="00:00:00" ? getOwed(Date.now()-item.timeIn, item.id)  : getOwed(item.timeOut-item.timeIn, item.id))}}</span>
         </template>
+        <template v-slot:expanded-item="{ item }">
+        <td colspan="100%" ><v-btn color="error" @click="deleteRecord(item.id)" class="float-right mr-5">Delete Record</v-btn></td>
+      </template>
       </v-data-table>
 
       <v-btn class="ml-12" @click="checkWhoSignIn()">Refresh</v-btn>
         <v-btn class="mr-12 float-right" @click="endOfDay()">Close Day Sheet</v-btn>
+
+    <v-dialog
+      v-model="searchUser"
+      scrollable fullscreen
+      persistent
+      max-width="600px"
+      transition="dialog-transition"
+    >
+    </v-dialog>
     <!-- register box -->
-    <v-dialog v-model="registerBox" persistent max-width="600px">
+    <v-dialog v-model="registerBox" persistent max-width="600px" transition="dialog-transition">
       <v-card>
         <v-app-bar color="blue">
           <v-card-title>
@@ -109,7 +126,12 @@
 
 <script>
 const server = "http://127.0.0.1/server/ajaxfile.php";
-const axios = require('axios').default;
+const Axios = require('axios');
+
+var axios = Axios.create({
+  withCredentials: true
+})
+
 
 export default {
   props: {
@@ -117,6 +139,7 @@ export default {
   },
   data: () => ({
     registerBox: false,
+    searchUser: false,
     username: "",
     name: "",
     password: "",
@@ -139,7 +162,27 @@ export default {
   }),
 
   methods: {
-    //change function to not send data if time out is 00:00:00
+    searchForUser(arg) {
+      let bodyFormData = new FormData();
+      bodyFormData.set('action', "search");
+      bodyFormData.set('arg', arg)
+
+      axios.post(server, bodyFormData)
+      .then((res) => {
+        console.log(res);
+      })
+    },
+    deleteRecord(id) {
+      let bodyFormData = new FormData();
+      bodyFormData.set('action', "deleteRecord");
+      bodyFormData.set('id', id)
+
+      axios.post(server, bodyFormData)
+      .then((res) => {
+        console.log(res);
+        this.checkWhoSignIn();
+      })
+    },
     getOwed(time, id) {
       let timeUsed = time / 3600000;
       let total = timeUsed * 5;
