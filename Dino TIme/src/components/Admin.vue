@@ -6,10 +6,12 @@
         <span class="font-weight-light">Admin</span>
       </span>
       <v-text-field
+        v-model="searchArg"
         solo-inverted
         flat
         hide-details
         label="Search"
+        @keydown.enter="searchForUser(searchArg)"
         prepend-inner-icon="mdi-magnify"
         class="mr-5"
       />
@@ -44,7 +46,7 @@
 
       <v-btn class="ml-12" @click="checkWhoSignIn()">Refresh</v-btn>
         <v-btn class="mr-12 float-right" @click="endOfDay()">Close Day Sheet</v-btn>
-
+    <!-- search results -->
     <v-dialog
       v-model="searchUser"
       scrollable fullscreen
@@ -52,6 +54,71 @@
       max-width="600px"
       transition="dialog-transition"
     >
+        <v-content class="grey darken-3 fill-height">
+      <v-data-table
+        :headers="searchHeader"
+        :items="searchedUsers"
+        disable-filtering
+        disable-pagination
+        class="elevation-1 mx-12 grey lighten-1"
+      >
+        <template v-slot:item.Admin="{ item }">
+          <span>{{item.Admin=="1" ? "Yes"  : "No"}}</span>
+        </template>
+        <template v-slot:item.Action="{ item }">
+          <span><v-btn @click="editThisUserPrime(item.UserName, item.Name)">Edit</v-btn></span>
+        </template>
+      </v-data-table>
+      <v-btn color="warning" class="mr-12 float-right" text @click="searchUser = false">Close</v-btn>
+        </v-content>
+    </v-dialog>
+    <!-- edit user -->
+    <v-dialog v-model="editUser" persistent max-width="600px" transition="dialog-transition">
+      <v-card>
+        <v-app-bar color="blue">
+          <v-card-title>
+            <span class="headline">Edit User</span>
+          </v-card-title>
+        </v-app-bar>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="usernameEdit"
+                  prepend-icon="mdi-account-circle"
+                  label="Username"
+                  type="text"
+                  required
+                ></v-text-field>
+              </v-col>
+                <v-col cols="12">
+                <v-text-field
+                  v-model="nameEdit"
+                  prepend-icon="mdi-account-circle"
+                  label="Name"
+                  type="text"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+              <v-col cols="12">
+                <v-switch
+                  v-model="admin"
+                  label="Admin?"
+                  prepend-icon="mdi-account-circle"
+                  color="success"
+                ></v-switch>
+              </v-col>
+          </v-container>
+        </v-card-text>
+        <v-card-subtitle class="error--text ml-5">{{ error }}</v-card-subtitle>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue" text @click="editUser = false">Close</v-btn>
+          <v-btn color="blue" text @click="editThisUser();">Confirm</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
     <!-- register box -->
     <v-dialog v-model="registerBox" persistent max-width="600px" transition="dialog-transition">
@@ -139,14 +206,31 @@ export default {
   },
   data: () => ({
     registerBox: false,
+    editUser: false,
     searchUser: false,
+    searchedUsers: [],
+    searchArg: "",
     username: "",
     name: "",
     password: "",
+    usernameEdit: "",
+    nameEdit: "",
+    editUserPrime: "",
     admin: false,
     res: "",
     confirmpassword: "",
     error: "",
+    searchHeader: [
+      {
+        text: "Users",
+        align: "left",
+        sortable: false,
+        value: "UserName"
+      },
+      { text: "Name", value: "Name" },
+      { text: "Admin?", value: "Admin" },
+      { text: ' ', value: 'Action', sortable: false }
+      ],
     headers: [
       {
         text: "Current Users Logged In",
@@ -154,7 +238,6 @@ export default {
         sortable: false,
         value: "user"
       },
-      { text: "Pre-paid Hours", value: "hours" },
       { text: "Time In", value: "timeIn" },
       { text: "Time Out", value: "timeOut" },
       { text: "Ammount Owed", value: "owedAmount" }
@@ -162,6 +245,31 @@ export default {
   }),
 
   methods: {
+    //need to test
+    editThisUser() {
+      let bodyFormData = new FormData();
+      if (this.admin = "false"){
+          newadmin = 0;
+      } else {
+        newadmin = 1;
+      }
+      bodyFormData.set('action', 'updateUser');
+      bodyFormData.set('oldUser', editUserPrime);
+      bodyFormData.set('newUser', usernameEdit);
+      bodyFormData.set('name', nameEdit);
+      bodyFormData.set('admin', newadmin);
+
+      axios.post(server, bodyFormData)
+      .then((res) => {
+        console.log(res);
+      })
+    },
+    editThisUserPrime(user, name) {
+      this.usernameEdit = user;
+      this.editUserPrime = user;
+      this.nameEdit = name;
+      this.editUser = true;
+    },
     searchForUser(arg) {
       let bodyFormData = new FormData();
       bodyFormData.set('action', "search");
@@ -169,7 +277,9 @@ export default {
 
       axios.post(server, bodyFormData)
       .then((res) => {
+        this.searchedUsers = res.data.searched;
         console.log(res);
+        this.searchUser = true;
       })
     },
     deleteRecord(id) {
