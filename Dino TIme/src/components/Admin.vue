@@ -40,12 +40,16 @@
           <span>{{(getTimeIn(item.timeOut)=="00:00:00" ? getOwed(Date.now()-item.timeIn, item.id)  : getOwed(item.timeOut-item.timeIn, item.id))}}</span>
         </template>
         <template v-slot:expanded-item="{ item }">
-        <td colspan="100%" ><v-btn color="error" @click="deleteRecord(item.id)" class="float-right mr-5">Delete Record</v-btn></td>
+        <td colspan="100%" >
+          <!-- add function -->
+          <v-btn color="secondary" @click="clockOut(item.id)" class="float-right mr-5">Sign Out</v-btn>
+          <v-btn color="error" @click="deleteRecord(item.id)" class="float-right mr-5">Delete Record</v-btn>
+          </td>
       </template>
       </v-data-table>
 
-      <v-btn class="ml-12" @click="checkWhoSignIn()">Refresh</v-btn>
-        <v-btn class="mr-12 float-right" @click="endOfDay()">Close Day Sheet</v-btn>
+      <v-btn class="ml-12" @click="checkWhoSignIn()" color="info">Refresh</v-btn>
+        <v-btn class="mr-12 float-right" color="warning" @click="endOfDay()">Close Day Sheet</v-btn>
     <!-- search results -->
     <v-dialog
       v-model="searchUser"
@@ -245,23 +249,20 @@ export default {
   }),
 
   methods: {
-    //need to test
     editThisUser() {
       let bodyFormData = new FormData();
-      if (this.admin = "false"){
-          newadmin = 0;
-      } else {
-        newadmin = 1;
-      }
+      let newadmin = 0;
+      if (this.admin === true) newadmin = 1;
       bodyFormData.set('action', 'updateUser');
-      bodyFormData.set('oldUser', editUserPrime);
-      bodyFormData.set('newUser', usernameEdit);
-      bodyFormData.set('name', nameEdit);
+      bodyFormData.set('oldUser', this.editUserPrime);
+      bodyFormData.set('newUser', this.usernameEdit);
+      bodyFormData.set('name', this.nameEdit);
       bodyFormData.set('admin', newadmin);
 
       axios.post(server, bodyFormData)
       .then((res) => {
         console.log(res);
+        this.editUser = false;
       })
     },
     editThisUserPrime(user, name) {
