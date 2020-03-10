@@ -1,19 +1,31 @@
 <template>
-  <v-app id="inspire">
+  <v-app
+          id="inspire">
     <v-content>
-      <v-container class="fill-height" fluid>
+      <v-container
+          class="fill-height"
+          fluid>
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="4">
-            <v-card class="elevation-12">
+            <v-card
+              class="elevation-12"
+              >
               <v-toolbar color="primary" dark flat>
                 <v-toolbar-title>Login</v-toolbar-title>
                 <v-spacer />
               </v-toolbar>
               <v-card-text>
                 <v-form>
-                  <v-text-field v-model="username" label="Username" name="login" prepend-icon="mdi-account" type="text" required />
-
                   <v-text-field
+                    @keydown.enter="login()"
+                    v-model="username" label="Username"
+                    name="login"
+                    prepend-icon="mdi-account"
+                    type="text"
+                    required
+                    />
+                  <v-text-field
+                    @keydown.enter="login()"
                     v-model="password"
                     id="password"
                     label="Password"

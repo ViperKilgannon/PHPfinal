@@ -31,23 +31,21 @@
         class="elevation-1 mx-12 grey lighten-1"
       >
         <template v-slot:item.timeIn="{ item }">
-          <span>{{getTimeIn(item.timeIn)}}</span>
+          <span>{{getTimeInOut(item.timeIn)}}</span>
         </template>
         <template v-slot:item.timeOut="{ item }">
-          <span>{{(getTimeIn(item.timeOut)=="00:00:00" ? "Currently Active" : getTimeIn(item.timeOut))}}</span>
+          <span>{{(getTimeInOut(item.timeOut)=="00:00:00" ? "Currently Active" : getTimeInOut(item.timeOut))}}</span>
         </template>
         <template v-slot:item.owedAmount="{ item }">
-          <span>{{(getTimeIn(item.timeOut)=="00:00:00" ? getOwed(Date.now()-item.timeIn, item.id)  : getOwed(item.timeOut-item.timeIn, item.id))}}</span>
+          <span>{{(getTimeInOut(item.timeOut)=="00:00:00" ? getOwed(Date.now()-item.timeIn, item.id)  : getOwed(item.timeOut-item.timeIn, item.id))}}</span>
         </template>
         <template v-slot:expanded-item="{ item }">
         <td colspan="100%" >
-          <!-- add function -->
           <v-btn color="secondary" @click="clockOut(item.id)" class="float-right mr-5">Sign Out</v-btn>
           <v-btn color="error" @click="deleteRecord(item.id)" class="float-right mr-5">Delete Record</v-btn>
           </td>
       </template>
       </v-data-table>
-
       <v-btn class="ml-12" @click="checkWhoSignIn()" color="info">Refresh</v-btn>
         <v-btn class="mr-12 float-right" color="warning" @click="endOfDay()">Close Day Sheet</v-btn>
     <!-- search results -->
@@ -77,7 +75,12 @@
         </v-content>
     </v-dialog>
     <!-- edit user -->
-    <v-dialog v-model="editUser" persistent max-width="600px" transition="dialog-transition">
+    <v-dialog
+            @keydown.enter="editThisUser()"
+            v-model="editUser"
+            persistent max-width="600px"
+            transition="dialog-transition"
+            >
       <v-card>
         <v-app-bar color="blue">
           <v-card-title>
@@ -125,7 +128,12 @@
       </v-card>
     </v-dialog>
     <!-- register box -->
-    <v-dialog v-model="registerBox" persistent max-width="600px" transition="dialog-transition">
+    <v-dialog
+    @keydown.enter="register()"
+    v-model="registerBox"
+    persistent max-width="600px"
+    transition="dialog-transition"
+    >
       <v-card>
         <v-app-bar color="blue">
           <v-card-title>
@@ -249,6 +257,17 @@ export default {
   }),
 
   methods: {
+    clockOut(id) {
+      let bodyFormData = new FormData();
+      bodyFormData.set('action', "signOutUser");
+      bodyFormData.set('id', id)
+      bodyFormData.set('time', Date.now());
+      axios.post(server, bodyFormData)
+      .then((res) => {
+        console.log(res);
+        this.checkWhoSignIn();
+      })
+    },
     editThisUser() {
       let bodyFormData = new FormData();
       let newadmin = 0;
@@ -325,7 +344,7 @@ export default {
 
       axios.post(server, bodyFormData)
       .then((res) => {
-        console.log(res);
+        this.checkWhoSignIn();
       })
     },
     register() {
@@ -365,7 +384,7 @@ export default {
           alert("Server Error Still Logged In");
         })
     },
-    getTimeIn(time) {
+    getTimeInOut(time) {
       function addZero(i) {
         if (i < 10) {
           i = "0" + i;
