@@ -46,8 +46,8 @@
           </td>
       </template>
       </v-data-table>
-      <v-btn class="ml-12" @click="checkWhoSignIn()" color="info">Refresh</v-btn>
-        <v-btn class="mr-12 float-right" color="warning" @click="endOfDay()">Close Day Sheet</v-btn>
+      <v-btn class="ml-12 mb-12" @click="checkWhoSignIn()" color="info">Refresh</v-btn>
+        <v-btn class="mr-12 mb-12 float-right" color="warning" @click="endOfDay()">Close Day Sheet</v-btn>
     <!-- search results -->
     <v-dialog
       v-model="searchUser"
@@ -232,6 +232,7 @@ export default {
     res: "",
     confirmpassword: "",
     error: "",
+    timerHandle: -1,
     searchHeader: [
       {
         text: "Users",
@@ -264,7 +265,6 @@ export default {
       bodyFormData.set('time', Date.now());
       axios.post(server, bodyFormData)
       .then((res) => {
-        console.log(res);
         this.checkWhoSignIn();
       })
     },
@@ -280,7 +280,6 @@ export default {
 
       axios.post(server, bodyFormData)
       .then((res) => {
-        console.log(res);
         this.editUser = false;
       })
     },
@@ -298,7 +297,6 @@ export default {
       axios.post(server, bodyFormData)
       .then((res) => {
         this.searchedUsers = res.data.searched;
-        console.log(res);
         this.searchUser = true;
       })
     },
@@ -309,7 +307,6 @@ export default {
 
       axios.post(server, bodyFormData)
       .then((res) => {
-        console.log(res);
         this.checkWhoSignIn();
       })
     },
@@ -317,14 +314,6 @@ export default {
       let timeUsed = time / 3600000;
       let total = timeUsed * 5;
       let price = "$" + total.toFixed(2);
-      let bodyFormData = new FormData();
-      bodyFormData.set('action', "owed");
-      bodyFormData.set('id', id);
-      bodyFormData.set('amount', total);
-      axios.post(server, bodyFormData)
-      .then((res) => {
-        console.log(res)
-      })
       return price;
     },
     checkWhoSignIn() {
@@ -333,7 +322,6 @@ export default {
 
       axios.post(server, bodyFormData)
       .then((res) => {
-        console.log(res);
         this.$root.currentSignedIn = res.data.currentUsers;
       })
     },
@@ -358,7 +346,6 @@ export default {
 
         axios.post(server, bodyFormData)
         .then((res) => {
-          console.log(res);
           if (res.data.success === true) {
           this.registerBox = false
           } else {
@@ -366,7 +353,6 @@ export default {
           }
         })
         .catch((res) => {
-          console.log(res);
           this.error = "Server Error";
         })
       }
@@ -376,11 +362,9 @@ export default {
         bodyFormData.set('action', "logout");
     axios.post(server, bodyFormData)
     .then((res) => {
-      console.log(res);
         this.$root.CurrentUser = false;
     })
     .catch((res) => {
-          console.log(res);
           alert("Server Error Still Logged In");
         })
     },
@@ -405,6 +389,18 @@ export default {
         time = "00:00:00";
       }
       return time;
+    }
+  },
+  beforeMount() {
+    this.checkWhoSignIn()
+ },
+    mounted() {
+    if (this.$root.isAdmin) {
+      if (this.timerHandle < 0) {
+        this.timerHandle = setInterval(() => {
+          this.checkWhoSignIn();
+        }, 10000);
+      }
     }
   }
 }

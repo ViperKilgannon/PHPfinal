@@ -8,20 +8,12 @@
     </v-app-bar>
 
     <v-content>
-      <v-card class="mx-12 my-5 text-center blue--text" color="grey" justify="center">
+      <v-card class="mx-12 my-5 text-center black--text" color="purple lighten-3" justify="center">
         <div justify="center">
-          <v-card-subtitle class="headline font-weight-bold error--text">Do Not Close Window</v-card-subtitle>
-          <v-card-subtitle
-            class="black--text"
-          >Leaving this window without logging out can result in multiple charges to your account.</v-card-subtitle>
-          <v-card-subtitle
-            class="black--text"
-          >Please only logout when you are finished to avoid additional charges to your account.</v-card-subtitle>
+          <v-card-subtitle class="headline font-weight-bold black--text"> Current time used: {{timerTime}}</v-card-subtitle>
         </div>
-      </v-card>
-      <v-card class="mx-12 my-5 text-center black--text" color="white" justify="center">
         <div justify="center">
-          <v-card-subtitle class="headline font-weight-bold black--text">{{timerTime}}</v-card-subtitle>
+          <v-card-subtitle class="headline font-weight-bold black--text">Current amount owed: ${{currentOwed}}</v-card-subtitle>
         </div>
       </v-card>
       <!-- changepassword -->
@@ -103,13 +95,20 @@ export default {
     confirmNewPassword: "",
     error: "",
     time: 0,
-    initialTime: Date.now(),
     currentTime: Date.now(),
     timerHandle: -1
   }),
   computed: {
+    elapsedTime() {
+      return this.currentTime - this.$root.timeIn;
+    },
+    currentOwed() {
+      let timeUsed = this.elapsedTime / 3600000;
+      let total = timeUsed * 5;
+      return total.toFixed(2);
+    },
     timerTime() {
-      var diff = Math.floor((this.currentTime - this.initialTime) / 1000);
+      var diff = Math.floor((this.elapsedTime) / 1000);
       var hour = Math.floor(diff / 3600)
       var min = Math.floor(diff / 60) % 60
       var sec = diff % 60
@@ -130,7 +129,6 @@ export default {
         bodyFormData.set("pass", this.password);
         bodyFormData.set("newPass", this.newPassword);
         axios.post(server, bodyFormData).then((res) => {
-          console.log(res);
           if (res.message === false) {
             this.error = res.data.message;
           }
@@ -144,19 +142,16 @@ export default {
       bodyFormData.set("action", "logout");
       bodyFormData.set("id", this.$root.CurrentUserSessionId);
       bodyFormData.set("time", Date.now());
-      axios
-        .post(server, bodyFormData)
+      axios.post(server, bodyFormData)
         .then((res) => {
-          console.log(res);
           this.$root.CurrentUser = false;
           this.$root.CurrentUserName = "";
           this.$root.CurrentUserSessionId = "";
         })
         .catch((res) => {
-          console.log(res);
           alert("Server Error Still Logged In");
         });
-    }
+    },
   },
   mounted() {
     if (this.timerHandle < 0) {

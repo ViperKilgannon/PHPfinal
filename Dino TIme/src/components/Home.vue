@@ -77,18 +77,17 @@ export default {
 
         axios.post(server, bodyFormData)
         .then((res) => {
-          console.log(res);
           if (res.data.success === true) {
           this.$root.CurrentUser = true;
           this.$root.isAdmin = res.data.admin;
           this.$root.CurrentUserName = res.data.user;
           this.$root.CurrentUserSessionId = res.data.id;
+          this.$root.timeIn = res.data.time;
           } else {
             this.error = res.data.message;
           }
         })
         .catch((res) => {
-          console.log(res);
           this.error = "Server Error";
         })
       },
@@ -115,5 +114,19 @@ export default {
       return time;
     }
     },
+    mounted() {
+    let bodyFormData = new FormData();
+    bodyFormData.set('action', "checkLogin");
+    axios.post(server, bodyFormData)
+      .then((res) => {
+      if (res.data.success) {
+          this.$root.CurrentUser = true;
+          this.$root.isAdmin = res.data.admin;
+          this.$root.CurrentUserName = res.data.user;
+          this.$root.CurrentUserSessionId = res.data.id;
+          this.$root.timeIn = res.data.time;
+      }
+    })
   }
+}
 </script>
